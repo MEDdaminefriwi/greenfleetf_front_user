@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class EmailStep extends StatelessWidget {
-  final VoidCallback onNext;
+  final Function(String email) onNext; // Pass email to the next step
 
   const EmailStep({Key? key, required this.onNext}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = const Color(0xFF1B4242);
+    final TextEditingController emailController = TextEditingController();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -26,6 +27,7 @@ class EmailStep extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextField(
+              controller: emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 labelText: "Email",
@@ -44,7 +46,15 @@ class EmailStep extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
-                onPressed: onNext,
+                onPressed: () {
+                  if (emailController.text.isNotEmpty) {
+                    onNext(emailController.text); // Pass email to the next step
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Please enter a valid email.")),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

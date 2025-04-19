@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PreferenceStep extends StatefulWidget {
   final VoidCallback onBack;
-  final VoidCallback onSubmit;
+  final Function(String preference) onSubmit; // Pass preference to SignUpFlow
 
   const PreferenceStep({
     Key? key,
@@ -77,7 +77,15 @@ class _PreferenceStepState extends State<PreferenceStep> {
                   child: const Text("Back"),
                 ),
                 ElevatedButton(
-                  onPressed: widget.onSubmit,
+                  onPressed: () {
+                    if (selectedPreference != null) {
+                      widget.onSubmit(selectedPreference!); // Pass preference
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please select a preference.")),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

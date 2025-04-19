@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NameStep extends StatelessWidget {
-  final VoidCallback onNext;
+  final Function(String firstName, String lastName) onNext; // Pass names to the next step
   final VoidCallback onBack;
 
   const NameStep({
@@ -13,6 +13,8 @@ class NameStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = const Color(0xFF1B4242);
+    final TextEditingController firstNameController = TextEditingController();
+    final TextEditingController lastNameController = TextEditingController();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -31,6 +33,7 @@ class NameStep extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextField(
+              controller: firstNameController,
               decoration: InputDecoration(
                 labelText: "First Name",
                 labelStyle: TextStyle(color: primaryColor),
@@ -46,6 +49,7 @@ class NameStep extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: lastNameController,
               decoration: InputDecoration(
                 labelText: "Last Name",
                 labelStyle: TextStyle(color: primaryColor),
@@ -72,7 +76,16 @@ class NameStep extends StatelessWidget {
                   child: const Text("Back"),
                 ),
                 ElevatedButton(
-                  onPressed: onNext,
+                  onPressed: () {
+                    if (firstNameController.text.isNotEmpty &&
+                        lastNameController.text.isNotEmpty) {
+                      onNext(firstNameController.text, lastNameController.text); // Pass names
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please enter your full name.")),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

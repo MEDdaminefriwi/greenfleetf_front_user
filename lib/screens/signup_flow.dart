@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../widgets/progress_indicator.dart';
 import 'steps/email_step.dart';
+import 'steps/password_step.dart';
 import 'steps/name_step.dart';
-import 'steps/phone_step.dart';
+import 'steps/phone_step.dart' as phone; // Alias to avoid conflict
 import 'steps/dob_step.dart';
 import 'steps/preference_step.dart';
-import 'package:flutter_course/screens/home_screen.dart';
+import 'steps/verification_step.dart';
+import 'home_screen.dart';
 
 class SignUpFlow extends StatefulWidget {
   @override
@@ -18,8 +22,11 @@ class _SignUpFlowState extends State<SignUpFlow> {
 
   final Color primaryColor = const Color(0xFF1B4242);
 
+  // Map to store user data collected from each step
+  final Map<String, dynamic> userData = {};
+
   void nextPage() {
-    if (currentPage < 4) {
+    if (currentPage < 6) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -35,6 +42,31 @@ class _SignUpFlowState extends State<SignUpFlow> {
         curve: Curves.easeInOut,
       );
       setState(() => currentPage--);
+    }
+  }
+
+  // Method to send signup data to the server
+  Future<void> submitSignup() async {
+    final url = Uri.parse('http://192.168.213.51:8080/auth/signup');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(userData),
+      );
+
+      if (response.statusCode == 200) {
+        // Navigate to the verification step
+        nextPage();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signup failed. Please try again.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred. Please try again.')),
+      );
     }
   }
 
@@ -58,11 +90,10 @@ class _SignUpFlowState extends State<SignUpFlow> {
       ),
       body: Column(
         children: [
-          // Custom progress indicator
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
             child: LinearProgressIndicator(
-              value: (currentPage + 1) / 5,
+              value: (currentPage + 1) / 7,
               backgroundColor: primaryColor.withOpacity(0.1),
               valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 5,
@@ -73,18 +104,57 @@ class _SignUpFlowState extends State<SignUpFlow> {
               controller: _controller,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                EmailStep(onNext: nextPage),
-                NameStep(onNext: nextPage, onBack: previousPage),
-                PhoneStep(onNext: nextPage, onBack: previousPage),
-                DobStep(onNext: nextPage, onBack: previousPage),
-                PreferenceStep(
+                EmailStep(
+                  onNext: (email) {
+                    userData['email'] = email; // Save email
+                    nextPage();
+                  },
+                ),
+                PasswordStep(
+                  onNext: (password) {
+                    userData['password'] = password; // Save password
+                    nextPage();
+                  },
                   onBack: previousPage,
-                  onSubmit: () {
+                ),
+                NameStep(
+                  onNext: (firstName, lastName) {
+                    userData['firstName'] = firstName; // Save first name
+                    userData['lastName'] = lastName; // Save last name
+                    nextPage();
+                  },
+                  onBack: previousPage,
+                ),
+                phone.PhoneStep(
+                  onNext: (phone) {
+                    userData['phone'] = phone; // Save phone number
+                    nextPage();
+                  },
+                  onBack: previousPage,
+                ),
+                DobStep(
+                  onNext: (dob) {
+                    userData['dob'] = dob; // Save date of birth
+                    nextPage();
+                  },
+                  onBack: previousPage,
+                ),
+                PreferenceStep(
+                  onSubmit: (preferences) {
+                    userData['preferences'] = preferences; // Save preferences
+                    submitSignup(); // Send data to the server
+                  },
+                  onBack: previousPage,
+                ),
+                VerificationStep(
+                  onSubmit: (code) {
+                    // Handle verification code submission
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     );
                   },
+                  onBack: previousPage,
                 ),
               ],
             ),

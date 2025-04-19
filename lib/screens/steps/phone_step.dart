@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PhoneStep extends StatelessWidget {
-  final VoidCallback onNext;
+  final Function(String phone) onNext; // Pass phone number to the next step
   final VoidCallback onBack;
 
   const PhoneStep({
@@ -13,6 +13,7 @@ class PhoneStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = const Color(0xFF1B4242);
+    final TextEditingController phoneController = TextEditingController();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -31,6 +32,7 @@ class PhoneStep extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextField(
+              controller: phoneController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: "Phone Number",
@@ -58,7 +60,15 @@ class PhoneStep extends StatelessWidget {
                   child: const Text("Back"),
                 ),
                 ElevatedButton(
-                  onPressed: onNext,
+                  onPressed: () {
+                    if (phoneController.text.isNotEmpty) {
+                      onNext(phoneController.text); // Pass phone number
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please enter your phone number.")),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-class DobStep extends StatelessWidget {
-  final VoidCallback onNext;
+class DobStep extends StatefulWidget {
+  final Function(String dob) onNext; // Pass date of birth to SignUpFlow
   final VoidCallback onBack;
 
   const DobStep({
@@ -9,6 +10,29 @@ class DobStep extends StatelessWidget {
     required this.onNext,
     required this.onBack,
   }) : super(key: key);
+
+  @override
+  State<DobStep> createState() => _DobStepState();
+}
+
+class _DobStepState extends State<DobStep> {
+  DateTime? _selectedDate;
+  final TextEditingController _dateController = TextEditingController();
+
+  Future<void> _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = DateFormat('MM/dd/yyyy').format(picked);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +54,10 @@ class DobStep extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            TextField(
-              keyboardType: TextInputType.datetime,
+            TextFormField(
+              controller: _dateController,
+              readOnly: true,
+              onTap: () => _pickDate(context),
               decoration: InputDecoration(
                 labelText: "Date of Birth (MM/DD/YYYY)",
                 labelStyle: TextStyle(color: primaryColor),
@@ -50,7 +76,7 @@ class DobStep extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: onBack,
+                  onPressed: widget.onBack,
                   style: TextButton.styleFrom(
                     foregroundColor: primaryColor,
                     textStyle: const TextStyle(fontWeight: FontWeight.w500),
@@ -58,7 +84,15 @@ class DobStep extends StatelessWidget {
                   child: const Text("Back"),
                 ),
                 ElevatedButton(
-                  onPressed: onNext,
+                  onPressed: () {
+                    if (_selectedDate != null) {
+                      widget.onNext(_dateController.text); // Pass date of birth
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Please select your date of birth.")),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

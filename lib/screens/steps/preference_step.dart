@@ -39,7 +39,7 @@ class _PreferenceStepState extends State<PreferenceStep> {
             ...[
               "Mr.",
               "Ms./Mrs.",
-              "I'd rather not say",
+
             ].map(
                   (option) => Container(
                 margin: const EdgeInsets.only(bottom: 12),

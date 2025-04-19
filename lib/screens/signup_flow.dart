@@ -119,29 +119,30 @@ class _SignUpFlowState extends State<SignUpFlow> {
                 ),
                 NameStep(
                   onNext: (firstName, lastName) {
-                    userData['firstName'] = firstName; // Save first name
-                    userData['lastName'] = lastName; // Save last name
+                    userData['firstname'] = firstName; // Save first name
+                    userData['lastname'] = lastName; // Save last name
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 phone.PhoneStep(
                   onNext: (phone) {
-                    userData['phone'] = phone; // Save phone number
+                    userData['phoneNumber'] = phone; // Save phone number
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 DobStep(
                   onNext: (dob) {
-                    userData['dob'] = dob; // Save date of birth
+                    userData['dateOfBirth'] = dob; // Save date of birth
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 PreferenceStep(
                   onSubmit: (preferences) {
-                    userData['preferences'] = preferences; // Save preferences
+                    if(preferences=="Mr."){
+                    userData['gender'] = "Male";}else{userData['Gender'] = "Female";} // Save preferences
                     submitSignup(); // Send data to the server
                   },
                   onBack: previousPage,

@@ -14,14 +14,21 @@ class Stopovers {
         stopoverStatus = null;
 
   factory Stopovers.fromJson(Map<String, dynamic> json) => Stopovers(
-    location: json['location'] != null
-        ? Location.fromJson(json['location'])
-        : null,
     stopoverStatus: json['stopoverStatus'],
+    location: json['location'] != null
+        ? Location.fromJson({
+      'latitude': json['latitude'],
+      'longitude': json['longitude'],
+      'nameLocation': json['name'],
+    })
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
-    'location': location?.toJson(),
-    'stopoverStatus': stopoverStatus,
+    "stopoverStatus": stopoverStatus,
+    "latitude": location?.latitude,
+    "longitude": location?.longitude,
+    "name": location?.nameLocation,
+
   };
 }

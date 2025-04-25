@@ -18,6 +18,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   bool _showPhone = false;
   final String _driverPhone = "23423423";
 
+
+
   Future<void> _saveRide(bool shouldPublish) async {
     // Update the published state
     setState(() {
@@ -26,9 +28,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
     // Prepare JSON data for the request
     final rideJson = widget.rideData.toJson();
-    final jsonString = jsonEncode(rideJson);
 
-    // Print the updated state (for debugging)
+    // Use JsonEncoder to pretty-print the JSON string
+    final jsonString = JsonEncoder.withIndent('  ').convert(rideJson);
+
+    // Print the updated state (pretty-printed JSON)
     print(jsonString);
 
     try {
@@ -40,7 +44,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
           // Add any authentication headers if needed
           // 'Authorization': 'Bearer your_token_here',
         },
-        body: jsonString,
+        body: jsonString, // Send the pretty-printed JSON
       );
 
       // Check if the request was successful
@@ -99,6 +103,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

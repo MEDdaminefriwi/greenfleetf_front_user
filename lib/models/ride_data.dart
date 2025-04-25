@@ -3,8 +3,8 @@ import '/models/location_data.dart';
 import 'stopover_data.dart';
 
 class RideData {
-  String? driverId;
-  String? carId;
+  int? driverId;
+  int? carId;
   DateTime? rideDate;
   TimeOfDay? rideTime;
   int? numberOfSeat;
@@ -37,7 +37,9 @@ class RideData {
   factory RideData.fromJson(Map<String, dynamic> json) => RideData(
     driverId: json['driverId'],
     carId: json['carId'],
-    rideDate: DateTime.tryParse(json['rideDate'] ?? ''),
+    rideDate: json['rideDate'] != null
+        ? DateTime.parse(json['rideDate'])
+        : null,
     rideTime: json['rideTime'] != null
         ? TimeOfDay(
       hour: int.parse(json['rideTime'].split(':')[0]),
@@ -60,10 +62,11 @@ class RideData {
     'driverId': driverId,
     'carId': carId,
     'rideDate': rideDate != null
-        ? '${rideDate!.year}-${rideDate!.month.toString().padLeft(2, '0')}-${rideDate!.day.toString().padLeft(2, '0')}'
+        ? '${rideDate!.year.toString().padLeft(4, '0')}-${rideDate!.month.toString().padLeft(2, '0')}-${rideDate!.day.toString().padLeft(2, '0')}'
         : null,
-    'rideTime':
-    rideTime != null ? '${rideTime!.hour}:${rideTime!.minute}' : null,
+    'rideTime': rideTime != null
+        ? '${rideTime!.hour.toString().padLeft(2, '0')}:${rideTime!.minute.toString().padLeft(2, '0')}'
+        : null,
     'numberOfSeat': numberOfSeat,
     'published': published,
     'stopovers': stopovers.map((e) => e.toJson()).toList(),

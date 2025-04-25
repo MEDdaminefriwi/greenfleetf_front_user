@@ -14,7 +14,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> with SingleTickerProvider
   late AnimationController _animationController;
   final List<RideData> rides = [
     RideData(
-      driverId: "123",
+      driverId: 123,
       rideDate: DateTime(2024, 11, 29),
       rideTime: TimeOfDay(hour: 19, minute: 40),
       numberOfSeat: 3,
@@ -23,7 +23,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> with SingleTickerProvider
       preferences: ["No Smoking", "Pet Friendly"],
     ),
     RideData(
-      driverId: "456",
+      driverId: 456,
       rideDate: DateTime(2024, 12, 5),
       rideTime: TimeOfDay(hour: 14, minute: 30),
       numberOfSeat: 2,

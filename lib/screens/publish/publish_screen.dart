@@ -7,8 +7,8 @@ class PublishScreen extends StatefulWidget {
   required Location address,
   required DateTime date,
   required TimeOfDay time,
-  required String driverId,
-  required String carId, // ✅ Ajouté ici
+  required int driverId,
+  required int carId, // ✅ Ajouté ici
   }) onNext;
 
   const PublishScreen({Key? key, required this.onNext}) : super(key: key);
@@ -22,11 +22,11 @@ class _PublishScreenState extends State<PublishScreen> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   String? selectedCarName;
-  String? selectedCarId;
+  int? selectedCarId;
 
-  final List<Map<String, String>> carOptions = [
-    {'name': 'Golf 7', 'id': 'golf7'},
-    {'name': 'Kia Sportage', 'id': 'kia_sportage'},
+  final List<Map<String, dynamic>> carOptions = [
+    {'name': 'Golf 7', 'id': 23},
+    {'name': 'Kia Sportage', 'id': 29},
   ];
 
   final Color primaryColor = const Color(0xFF1B4242);
@@ -200,7 +200,7 @@ class _PublishScreenState extends State<PublishScreen> {
                         address: address!,
                         date: selectedDate!,
                         time: selectedTime!,
-                        driverId: "AHWA E DRIVER ID",
+                        driverId: 27,     ////////////**********************************AHWA E DRIVER ID *************************
                         carId: selectedCarId!, // ✅ Transmet le carId choisi
                       );
                     } else {

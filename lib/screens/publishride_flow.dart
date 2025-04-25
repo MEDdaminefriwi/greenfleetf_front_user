@@ -89,8 +89,8 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                     required Location address,
                     required DateTime date,
                     required TimeOfDay time,
-                    required String driverId,
-                    required String carId,
+                    required int driverId,
+                    required int carId,
                   }) {
                     rideData.driverId = driverId;
                     rideData.rideDate = date;
@@ -100,7 +100,7 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                     rideData.stopovers.add(
                       Stopovers(
                         location: address,
-                        stopoverStatus: 'pending',
+                        stopoverStatus: 'PENDING',
                       ),
                     );
 
@@ -125,7 +125,7 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                       newStopovers.map(
                             (loc) => Stopovers(
                           location: loc,
-                          stopoverStatus: 'pending',
+                          stopoverStatus: 'PENDING',
                         ),
                       ),
                     );

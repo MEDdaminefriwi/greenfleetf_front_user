@@ -20,7 +20,8 @@ class LoginScreen extends StatelessWidget {
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> login(BuildContext context) async {
-    final url = Uri.parse('http://192.168.213.51:8080/auth/login');
+
+    /* final url = Uri.parse('http://192.168.213.51:8080/auth/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -34,15 +35,17 @@ class LoginScreen extends StatelessWidget {
       final responseData = jsonDecode(response.body);
       final token = responseData['token'];
       print('Token: $token');
-      Navigator.push(
+      */Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
-    } else {
+   /*  } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login failed. Please try again.')),
       );
-    }
+    }*/
+
+
   }
 
   @override

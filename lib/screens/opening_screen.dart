@@ -12,7 +12,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 7), () {
+    Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) =>  FirstScreen()),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PreferenceStep extends StatefulWidget {
   final VoidCallback onBack;
-  final Function(String preference) onSubmit; // Pass preference to SignUpFlow
+  final Function(String preference) onSubmit;
 
   const PreferenceStep({
     Key? key,
@@ -17,6 +17,12 @@ class PreferenceStep extends StatefulWidget {
 class _PreferenceStepState extends State<PreferenceStep> {
   String? selectedPreference;
   final Color primaryColor = const Color(0xFF1B4242);
+
+  final List<String> preferences = [
+    "Mr.",
+    "Ms./Mrs.",
+
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +42,7 @@ class _PreferenceStepState extends State<PreferenceStep> {
               ),
             ),
             const SizedBox(height: 24),
-            ...[
-              "Mr.",
-              "Ms./Mrs.",
-
-            ].map(
+            ...preferences.map(
                   (option) => Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
@@ -51,16 +53,15 @@ class _PreferenceStepState extends State<PreferenceStep> {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: RadioListTile(
+                child: RadioListTile<String>(
                   title: Text(option),
-                  activeColor: primaryColor,
                   value: option,
                   groupValue: selectedPreference,
+                  activeColor: primaryColor,
                   onChanged: (value) {
-                    setState(() {
-                      selectedPreference = value.toString();
-                    });
+                    setState(() => selectedPreference = value);
                   },
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
               ),
             ),
@@ -79,10 +80,10 @@ class _PreferenceStepState extends State<PreferenceStep> {
                 ElevatedButton(
                   onPressed: () {
                     if (selectedPreference != null) {
-                      widget.onSubmit(selectedPreference!); // Pass preference
+                      widget.onSubmit(selectedPreference!);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Please select a preference.")),
+                        const SnackBar(content: Text("Please select a preference.")),
                       );
                     }
                   },

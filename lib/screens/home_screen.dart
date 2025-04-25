@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'inbox_screen.dart';
 import 'my_rides_screen.dart';
 import 'profile_screen.dart';
-import 'search_screen.dart';
-import 'publish_screen.dart';
+import 'search/search_screen.dart';
+import 'publish/publish_screen.dart';
+import 'publishride_flow.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -177,7 +178,7 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PublishScreen()),
+                  MaterialPageRoute(builder: (context) => PublishRideFlow()),
                 );
               },
               child: Padding(

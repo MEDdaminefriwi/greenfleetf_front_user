@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DobStep extends StatefulWidget {
-  final Function(String dob) onNext; // Pass date of birth to SignUpFlow
+  final Function(String dob) onNext;
   final VoidCallback onBack;
 
   const DobStep({
@@ -29,7 +29,7 @@ class _DobStepState extends State<DobStep> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
-        _dateController.text = DateFormat('MM/dd/yyyy').format(picked);
+        _dateController.text = DateFormat('yyyy/MM/dd').format(picked);
       });
     }
   }
@@ -59,7 +59,7 @@ class _DobStepState extends State<DobStep> {
               readOnly: true,
               onTap: () => _pickDate(context),
               decoration: InputDecoration(
-                labelText: "Date of Birth (MM/DD/YYYY)",
+                labelText: "Date of Birth (yyyy/MM/dd)",
                 labelStyle: TextStyle(color: primaryColor),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: primaryColor, width: 2),

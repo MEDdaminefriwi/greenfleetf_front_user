@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'home_screen.dart'; // Make sure this points to your home screen file
+import '../home_screen.dart';
+import '../location_picker_screen.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+
 class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -20,8 +23,13 @@ class FindRidePage extends StatefulWidget {
 class _FindRidePageState extends State<FindRidePage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _fromController = TextEditingController();
+  final TextEditingController _toController = TextEditingController();
+  final TextEditingController _passengersController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  GeoPoint? _fromLocation;
+  GeoPoint? _toLocation;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -79,6 +87,29 @@ class _FindRidePageState extends State<FindRidePage> {
     }
   }
 
+  Future<void> _selectLocation(bool isFrom) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationPickerScreen(
+          title: isFrom ? 'Select Starting Point' : 'Select Destination',
+        ),
+      ),
+    );
+
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() {
+        if (isFrom) {
+          _fromLocation = result['location'] as GeoPoint;
+          _fromController.text = result['address'] as String;
+        } else {
+          _toLocation = result['location'] as GeoPoint;
+          _toController.text = result['address'] as String;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -97,7 +128,6 @@ class _FindRidePageState extends State<FindRidePage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Color(0xFF1b4242)),
           onPressed: () {
-            // Navigate back to home screen
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => HomeScreen()),
             );
@@ -113,16 +143,48 @@ class _FindRidePageState extends State<FindRidePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTextField(
-                label: 'Leaving from',
-                icon: Icons.location_on_outlined,
-                iconColor: Color(0xFF1b4242),
+              InkWell(
+                onTap: () => _selectLocation(true),
+                child: IgnorePointer(
+                  child: TextFormField(
+                    controller: _fromController,
+                    decoration: InputDecoration(
+                      labelText: 'Leaving from',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      prefixIcon: Icon(Icons.location_on_outlined, color: Color(0xFF1b4242)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Color(0xFF1b4242)),
+                      ),
+                    ),
+                  ),
+                ),
               ),
               SizedBox(height: screenHeight * 0.02),
-              _buildTextField(
-                label: 'Going to',
-                icon: Icons.location_searching,
-                iconColor: Color(0xFF1b4242),
+              InkWell(
+                onTap: () => _selectLocation(false),
+                child: IgnorePointer(
+                  child: TextFormField(
+                    controller: _toController,
+                    decoration: InputDecoration(
+                      labelText: 'Going to',
+                      labelStyle: TextStyle(color: Colors.grey[600]),
+                      prefixIcon: Icon(Icons.location_searching, color: Color(0xFF1b4242)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Color(0xFF1b4242)),
+                      ),
+                    ),
+                  ),
+                ),
               ),
               SizedBox(height: screenHeight * 0.02),
               Row(
@@ -136,8 +198,7 @@ class _FindRidePageState extends State<FindRidePage> {
                           decoration: InputDecoration(
                             labelText: 'Date',
                             labelStyle: TextStyle(color: Colors.grey[600]),
-                            prefixIcon: Icon(Icons.calendar_today,
-                                color: Color(0xFF1b4242)),
+                            prefixIcon: Icon(Icons.calendar_today, color: Color(0xFF1b4242)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey),
@@ -161,8 +222,7 @@ class _FindRidePageState extends State<FindRidePage> {
                           decoration: InputDecoration(
                             labelText: 'Time',
                             labelStyle: TextStyle(color: Colors.grey[600]),
-                            prefixIcon: Icon(Icons.access_time,
-                                color: Color(0xFF1b4242)),
+                            prefixIcon: Icon(Icons.access_time, color: Color(0xFF1b4242)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.grey),
@@ -179,10 +239,22 @@ class _FindRidePageState extends State<FindRidePage> {
                 ],
               ),
               SizedBox(height: screenHeight * 0.02),
-              _buildTextField(
-                label: 'Number of passengers',
-                icon: Icons.person_outline,
-                iconColor: Color(0xFF1b4242),
+              TextField(
+                controller: _passengersController,
+                decoration: InputDecoration(
+                  labelText: 'Number of passengers',
+                  labelStyle: TextStyle(color: Colors.grey[600]),
+                  prefixIcon: Icon(Icons.person_outline, color: Color(0xFF1b4242)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Color(0xFF1b4242)),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
               ),
               SizedBox(height: screenHeight * 0.05),
               SizedBox(
@@ -211,28 +283,6 @@ class _FindRidePageState extends State<FindRidePage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required IconData icon,
-    Color iconColor = Colors.grey,
-  }) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.grey[600]),
-        prefixIcon: Icon(icon, color: iconColor),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFF1b4242)),
         ),
       ),
     );

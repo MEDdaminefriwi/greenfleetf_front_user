@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 import '../widgets/progress_indicator.dart';
-import 'steps/email_step.dart';
+
 import 'steps/password_step.dart';
 import 'steps/name_step.dart';
-import 'steps/phone_step.dart' as phone; // Alias to avoid conflict
+import 'steps/phone_step.dart' as phone;
 import 'steps/dob_step.dart';
 import 'steps/preference_step.dart';
 import 'steps/verification_step.dart';
 import 'home_screen.dart';
+import 'steps/email_step.dart';
+import '/models/user_data.dart';
 
 class SignUpFlow extends StatefulWidget {
   @override
@@ -22,8 +25,8 @@ class _SignUpFlowState extends State<SignUpFlow> {
 
   final Color primaryColor = const Color(0xFF1B4242);
 
-  // Map to store user data collected from each step
-  final Map<String, dynamic> userData = {};
+  final UserData userData = UserData();
+
 
   void nextPage() {
     if (currentPage < 6) {
@@ -45,29 +48,34 @@ class _SignUpFlowState extends State<SignUpFlow> {
     }
   }
 
-  // Method to send signup data to the server
+  // Dummy method to simulate signup without backend
   Future<void> submitSignup() async {
-    final url = Uri.parse('http://192.168.213.51:8080/auth/signup');
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(userData),
-      );
 
-      if (response.statusCode == 200) {
-        // Navigate to the verification step
-        nextPage();
-      } else {
+
+      final url = Uri.parse('http://localhost:8080/auth/signup');
+
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(userData.toJson()),
+        );
+
+        if (response.statusCode == 200) {
+          nextPage();
+        } else {
+          print('Server responded: ${response.body}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Signup failed. Please try again.')),
+          );
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Signup failed. Please try again.')),
+          SnackBar(content: Text('An error occurred. Please try again.')),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred. Please try again.')),
-      );
-    }
+    // ✅ Don't forget this!
+
   }
 
   @override
@@ -106,54 +114,77 @@ class _SignUpFlowState extends State<SignUpFlow> {
               children: [
                 EmailStep(
                   onNext: (email) {
-                    userData['email'] = email; // Save email
+                    userData.email = email;
                     nextPage();
                   },
                 ),
                 PasswordStep(
                   onNext: (password) {
-                    userData['password'] = password; // Save password
+                    userData.password = password;
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 NameStep(
                   onNext: (firstName, lastName) {
-                    userData['firstname'] = firstName; // Save first name
-                    userData['lastname'] = lastName; // Save last name
+                    userData.firstname = firstName;
+                    userData.lastname = lastName;
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 phone.PhoneStep(
-                  onNext: (phone) {
-                    userData['phoneNumber'] = phone; // Save phone number
+                  onNext: (phoneNumber) {
+                    userData.phoneNumber = phoneNumber;
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 DobStep(
                   onNext: (dob) {
-                    userData['dateOfBirth'] = dob; // Save date of birth
+                    userData.dateOfBirth = dob;
                     nextPage();
                   },
                   onBack: previousPage,
                 ),
                 PreferenceStep(
                   onSubmit: (preferences) {
-                    if(preferences=="Mr."){
-                    userData['gender'] = "Male";}else{userData['Gender'] = "Female";} // Save preferences
-                    submitSignup(); // Send data to the server
+                    userData.gender = (preferences == "Mr.") ? "Male" : "Female";
+                    submitSignup();
                   },
                   onBack: previousPage,
                 ),
                 VerificationStep(
-                  onSubmit: (code) {
-                    // Handle verification code submission
+                  onSubmit: (code) async {
+                    /*final url = Uri.parse('http://localhost:8080/auth/verify');
+                     final body = {
+                       'email': userData.email,
+                       'verificationCode': code,
+                     };
+
+                     try {
+                       final response = await http.post(
+                         url,
+                         headers: {'Content-Type': 'application/json'},
+                         body: jsonEncode(body),
+                       );
+
+                      if (response.statusCode == 200) {*/
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     );
+                    /*   } else {
+                         print('Verification failed: ${response.body}');
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(content: Text('Verification failed. Please check the code.')),
+                         );
+                       }
+                     } catch (e) {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         SnackBar(content: Text('An error occurred during verification.')),
+                       );
+                     } */
                   },
                   onBack: previousPage,
                 ),

@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
 import '/models/location_data.dart';
+import 'stopover_data.dart';
 
 class RideData {
   String? driverId;
+  String? carId;
   DateTime? rideDate;
   TimeOfDay? rideTime;
   int? numberOfSeat;
   bool published;
-  List<Location> stopovers;
+  List<Stopovers> stopovers;
   List<String> preferences;
 
   RideData({
     this.driverId,
+    this.carId,
     this.rideDate,
     this.rideTime,
     this.numberOfSeat,
     this.published = false,
-    List<Location>? stopovers,
+    List<Stopovers>? stopovers,
     List<String>? preferences,
   })  : stopovers = stopovers ?? [],
         preferences = preferences ?? [];
 
-  // No-argument constructor with default values
   RideData.empty()
       : driverId = null,
+        carId = null,
         rideDate = null,
         rideTime = null,
         numberOfSeat = null,
@@ -33,6 +36,7 @@ class RideData {
 
   factory RideData.fromJson(Map<String, dynamic> json) => RideData(
     driverId: json['driverId'],
+    carId: json['carId'],
     rideDate: DateTime.tryParse(json['rideDate'] ?? ''),
     rideTime: json['rideTime'] != null
         ? TimeOfDay(
@@ -43,7 +47,7 @@ class RideData {
     numberOfSeat: json['numberOfSeat'],
     published: json['published'] ?? false,
     stopovers: (json['stopovers'] as List<dynamic>?)
-        ?.map((item) => Location.fromJson(item))
+        ?.map((item) => Stopovers.fromJson(item))
         .toList() ??
         [],
     preferences: (json['preferences'] as List<dynamic>?)
@@ -54,12 +58,12 @@ class RideData {
 
   Map<String, dynamic> toJson() => {
     'driverId': driverId,
+    'carId': carId,
     'rideDate': rideDate != null
         ? '${rideDate!.year}-${rideDate!.month.toString().padLeft(2, '0')}-${rideDate!.day.toString().padLeft(2, '0')}'
         : null,
-    'rideTime': rideTime != null
-        ? '${rideTime!.hour}:${rideTime!.minute}'
-        : null,
+    'rideTime':
+    rideTime != null ? '${rideTime!.hour}:${rideTime!.minute}' : null,
     'numberOfSeat': numberOfSeat,
     'published': published,
     'stopovers': stopovers.map((e) => e.toJson()).toList(),

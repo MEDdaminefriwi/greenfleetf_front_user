@@ -246,32 +246,27 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
           ),
 
           // Confirm button
-          if (selectedLocation != null && selectedAddress != null)
-            SafeArea(
-              minimum: const EdgeInsets.all(16),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1b4242),
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
-                ),
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                    Location(
-                      latitude: selectedLocation!.latitude,
-                      longitude: selectedLocation!.longitude,
-                      nameLocation: selectedAddress!,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.check_circle_outline),
-                label: const Text("Confirm Location"),
-              ),
-            ),
+              // Confirm small check button
+              if (selectedLocation != null && selectedAddress != null)
+    Positioned(
+    bottom: 20,
+    right: 20,
+    child: FloatingActionButton(
+    backgroundColor: const Color(0xFF1b4242),
+    onPressed: () {
+    Navigator.pop(
+    context,
+    Location(
+    latitude: selectedLocation!.latitude,
+    longitude: selectedLocation!.longitude,
+    nameLocation: selectedAddress!,
+    ),
+    );
+    },
+    child: const Icon(Icons.check, color: Colors.white),
+    ),
+    ),
+
         ],
       ),
     );

@@ -1,152 +1,420 @@
 import 'package:flutter/material.dart';
+import '/models/ride_data.dart';
+import 'publish/confirmation_screen.dart';
+import 'dart:ui';
 
-class MyRidesScreen extends StatelessWidget {
-  // Example list of rides (you can replace this with dynamic data)
-  final List<Map<String, dynamic>> rides = [
-    {
-      "from": "Ahmedabad",
-      "to": "Mumbai",
-      "price": 4272.00,
-      "date": "Nov 29, 2024",
-      "time": "07:40 PM",
-      "seatsBooked": 0,
-      "status": "Published",
-      "publishDate": "Nov 29, 2024 02:50 PM",
-    },
+class MyRidesScreen extends StatefulWidget {
+  const MyRidesScreen({Key? key}) : super(key: key);
+
+  @override
+  _MyRidesScreenState createState() => _MyRidesScreenState();
+}
+
+class _MyRidesScreenState extends State<MyRidesScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  final List<RideData> rides = [
+    RideData(
+      driverId: "123",
+      rideDate: DateTime(2024, 11, 29),
+      rideTime: TimeOfDay(hour: 19, minute: 40),
+      numberOfSeat: 3,
+      published: false,
+      stopovers: [],
+      preferences: ["No Smoking", "Pet Friendly"],
+    ),
+    RideData(
+      driverId: "456",
+      rideDate: DateTime(2024, 12, 5),
+      rideTime: TimeOfDay(hour: 14, minute: 30),
+      numberOfSeat: 2,
+      published: false,
+      stopovers: [],
+      preferences: ["No Food"],
+    ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  // Format date to a more readable format
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  // Format time to 12-hour format with AM/PM
+  String _formatTime(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '${hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} $period';
+  }
+
+  void _modifyRide(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ConfirmationScreen(rideData: rides[index]),
+      ),
+    ).then((_) {
+      setState(() {}); // Refresh UI when returning from edit screen
+    });
+  }
+
+  void _publishRide(int index) {
+    setState(() {
+      rides[index].published = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 12),
+            const Text(
+              "Ride Published Successfully!",
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF0A8270),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: Text("My Rides"),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          "My Rides",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // Tab bar for "Booked" and "Published" (static for now)
-          Container(
-            color: Colors.grey[200],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "Booked",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
+      body: rides.isEmpty
+          ? _buildEmptyState()
+          : AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            itemCount: rides.length,
+            itemBuilder: (context, index) {
+              final ride = rides[index];
+              // Staggered animation for list items
+              final itemAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+                CurvedAnimation(
+                  parent: _animationController,
+                  curve: Interval(
+                    index * 0.1,
+                    index * 0.1 + 0.5,
+                    curve: Curves.easeOut,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "Published",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+              );
+
+              return FadeTransition(
+                opacity: itemAnimation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.2, 0),
+                    end: Offset.zero,
+                  ).animate(itemAnimation),
+                  child: _buildRideCard(ride, index),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.directions_car_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "No rides yet",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRideCard(RideData ride, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Card Header with gradient and status
+          Container(
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: ride.published
+                    ? [const Color(0xFF0A8270), const Color(0xFF1E6F7C)]
+                    : [const Color(0xFFF59E0B), const Color(0xFFD97706)],
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      ride.published ? Icons.check_circle : Icons.pending_outlined,
+                      color: Colors.white,
+                      size: 20,
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      ride.published ? "Published" : "Draft",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  ride.rideDate != null ? _formatDate(ride.rideDate!) : "N/A",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
               ],
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: rides.length,
-              itemBuilder: (context, index) {
-                final ride = rides[index];
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "${ride['from']} → ${ride['to']}",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "\$${ride['price'].toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                            SizedBox(width: 4),
-                            Text(
-                              ride['date'],
-                              style: TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.access_time, size: 16, color: Colors.grey),
-                            SizedBox(width: 4),
-                            Text(
-                              ride['time'],
-                              style: TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.person_outline, size: 16, color: Colors.grey),
-                            SizedBox(width: 4),
-                            Text(
-                              "${ride['seatsBooked']} Seats Booked",
-                              style: TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.check_circle, size: 16, color: Colors.green),
-                            SizedBox(width: 4),
-                            Text(
-                              ride['status'],
-                              style: TextStyle(fontSize: 14, color: Colors.green),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Publish on: ${ride['publishDate']}",
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
+
+          // Card Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Time and Seats Row
+                Row(
+                  children: [
+                    _buildInfoItem(
+                      Icons.access_time_rounded,
+                      ride.rideTime != null ? _formatTime(ride.rideTime!) : "N/A",
+                      "Departure Time",
+                    ),
+                    const SizedBox(width: 24),
+                    _buildInfoItem(
+                      Icons.airline_seat_recline_normal_rounded,
+                      "${ride.numberOfSeat ?? 0}",
+                      "Available Seats",
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Preferences
+                if (ride.preferences.isNotEmpty) ...[
+                  const Text(
+                    "Preferences",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
                     ),
                   ),
-                );
-              },
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: ride.preferences.map((pref) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0F2F1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          pref,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF0A8270),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Action Buttons
+                if (!ride.published)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildActionButton(
+                        "Modify",
+                        Icons.edit_outlined,
+                        const Color(0xFF64748B),
+                            () => _modifyRide(index),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildActionButton(
+                        "Publish",
+                        Icons.publish_rounded,
+                        const Color(0xFF0A8270),
+                            () => _publishRide(index),
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildActionButton(
+                        "View Details",
+                        Icons.visibility_outlined,
+                        const Color(0xFF0A8270),
+                            () {
+                          // View ride details
+                        },
+                      ),
+                    ],
+                  ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(IconData icon, String value, String label) {
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0F2F1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: const Color(0xFF0A8270),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(
+        label,
+        style: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
       ),
     );
   }

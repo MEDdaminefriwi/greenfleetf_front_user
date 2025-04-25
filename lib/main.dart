@@ -18,7 +18,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Ride Sharing App',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(
+        primarySwatch: Colors.teal, // ⬅️ Changed from Colors.blue to Colors.teal
+      ),
       useInheritedMediaQuery: true,
       initialRoute: '/',
       routes: {

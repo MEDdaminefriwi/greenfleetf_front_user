@@ -8,6 +8,7 @@ class PublishScreen extends StatefulWidget {
   required DateTime date,
   required TimeOfDay time,
   required String driverId,
+  required String carId, // ✅ Ajouté ici
   }) onNext;
 
   const PublishScreen({Key? key, required this.onNext}) : super(key: key);
@@ -20,6 +21,13 @@ class _PublishScreenState extends State<PublishScreen> {
   Location? address;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  String? selectedCarName;
+  String? selectedCarId;
+
+  final List<Map<String, String>> carOptions = [
+    {'name': 'Golf 7', 'id': 'golf7'},
+    {'name': 'Kia Sportage', 'id': 'kia_sportage'},
+  ];
 
   final Color primaryColor = const Color(0xFF1B4242);
   final Color secondaryColor = const Color(0xFF5C8374);
@@ -92,8 +100,7 @@ class _PublishScreenState extends State<PublishScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   color: value.contains("Tap") ? Colors.grey : Colors.black,
-                  fontWeight:
-                  value.contains("Tap") ? FontWeight.normal : FontWeight.w500,
+                  fontWeight: value.contains("Tap") ? FontWeight.normal : FontWeight.w500,
                 ),
               ),
             ),
@@ -111,8 +118,48 @@ class _PublishScreenState extends State<PublishScreen> {
       case 'Date & Time':
         return Icons.calendar_month_rounded;
       default:
-        return Icons.info_outline;
+        return Icons.directions_car_filled_rounded;
     }
+  }
+
+  Widget _buildCarDropdown() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: primaryColor.withOpacity(0.15)),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: selectedCarName,
+          hint: const Text('Select a Car'),
+          icon: const Icon(Icons.arrow_drop_down),
+          onChanged: (String? newValue) {
+            final car = carOptions.firstWhere((car) => car['name'] == newValue);
+            setState(() {
+              selectedCarName = car['name'];
+              selectedCarId = car['id'];
+            });
+          },
+          items: carOptions.map((car) {
+            return DropdownMenuItem<String>(
+              value: car['name'],
+              child: Text(car['name']!),
+            );
+          }).toList(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -138,18 +185,23 @@ class _PublishScreenState extends State<PublishScreen> {
                     : 'Tap to select Date & Time',
                 _selectDateTime,
               ),
+              _buildCarDropdown(), // ✅ Ajout du menu déroulant de voiture
               const Spacer(),
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    if (address != null && selectedDate != null && selectedTime != null) {
+                    if (address != null &&
+                        selectedDate != null &&
+                        selectedTime != null &&
+                        selectedCarId != null) {
                       widget.onNext(
                         address: address!,
                         date: selectedDate!,
                         time: selectedTime!,
                         driverId: "AHWA E DRIVER ID",
+                        carId: selectedCarId!, // ✅ Transmet le carId choisi
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(

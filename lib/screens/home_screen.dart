@@ -5,6 +5,7 @@ import 'profile_screen.dart';
 import 'search/search_screen.dart';
 import 'publish/publish_screen.dart';
 import 'publishride_flow.dart';
+import 'mybooking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     HomePage(),
     MyRidesScreen(),
+    MyBookingScreen(), // Add the MyBookingScreen here
     InboxScreen(),
     ProfileScreen(),
   ];
@@ -59,6 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
             label: "My Rides",
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.book_online), // New Booking Icon
+            label: "Booking",
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.inbox),
             label: "Inbox",
           ),
@@ -71,7 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

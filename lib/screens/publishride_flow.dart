@@ -21,6 +21,24 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
 
   final RideData rideData = RideData.empty();
 
+  // Helper method to print rideData in a readable format
+  void _printRideData() {
+    debugPrint('------ Current rideData ------');
+    debugPrint('Driver ID: ${rideData.driverId}');
+    debugPrint('Car ID: ${rideData.carId}');
+    debugPrint('Date: ${rideData.rideDate}');
+    debugPrint('Time: ${rideData.rideTime}');
+    debugPrint('Seats: ${rideData.numberOfSeat}');
+
+    debugPrint('Stopovers:');
+    for (var stop in rideData.stopovers) {
+      debugPrint('  - ${stop.location?.nameLocation} (Status: ${stop.stopoverStatus})');
+    }
+
+    debugPrint('Preferences: ${rideData.preferences}');
+    debugPrint('------------------------------');
+  }
+
   void nextPage() {
     if (currentPage < 4) {
       _controller.nextPage(
@@ -28,6 +46,7 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
         curve: Curves.easeInOut,
       );
       setState(() => currentPage++);
+      _printRideData(); // Print after state update
     }
   }
 
@@ -38,10 +57,12 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
         curve: Curves.easeInOut,
       );
       setState(() => currentPage--);
+      _printRideData(); // Print after state update
     }
   }
 
   void submitRide() {
+    _printRideData(); // Print final state before submission
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -104,6 +125,8 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                       ),
                     );
 
+                    debugPrint('\n===== Data after PublishScreen =====');
+                    _printRideData();
                     nextPage();
                   },
                 ),
@@ -129,9 +152,15 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                         ),
                       ),
                     );
+
+                    debugPrint('\n===== Data after StopoverScreen =====');
+                    _printRideData();
                     nextPage();
                   },
-                  onBack: () => Navigator.pop(context),
+                  onBack: () {
+                    debugPrint('Returning from StopoverScreen');
+                    Navigator.pop(context);
+                  },
                 ),
                 PlacesScreen(
                   onNext: (seats, womenOnly) {
@@ -142,6 +171,9 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                         rideData.preferences!.add("Women Only");
                       }
                     }
+
+                    debugPrint('\n===== Data after PlacesScreen =====');
+                    _printRideData();
                     nextPage();
                   },
                   onBack: previousPage,
@@ -149,6 +181,9 @@ class _PublishRideFlowState extends State<PublishRideFlow> {
                 PreferencesScreen(
                   onSubmit: (List<String> preferences) {
                     rideData.preferences.addAll(preferences);
+
+                    debugPrint('\n===== Final Data before Submission =====');
+                    _printRideData();
                     submitRide();
                   },
                   onBack: previousPage,
